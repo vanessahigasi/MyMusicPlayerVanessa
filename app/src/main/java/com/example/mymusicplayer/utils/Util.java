@@ -1,4 +1,6 @@
-package com.example.mymusicplayer;
+package com.example.mymusicplayer.utils;
+
+import com.example.mymusicplayer.Songs;
 
 import java.util.ArrayList;
 import java.util.List;
