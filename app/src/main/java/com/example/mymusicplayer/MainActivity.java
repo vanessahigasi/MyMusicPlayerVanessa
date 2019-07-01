@@ -1,19 +1,28 @@
 package com.example.mymusicplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -139,8 +148,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         mediaPlayer.start();
                     }
                 }
-
         }
+    }
+
+    private void generateNotification(final int position) {
+
+        final NotificationManager notifManager =
+                (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
+
+        final NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this,"channelId")
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("Music")
+                        .setContentText("Song Playing")
+                        .setContentIntent(getPendingIntentWithRequestCode(23));
+
+        final RemoteViews customNotifications = new RemoteViews(getPackageName(),R.layout.notification);
+        customNotifications.setImageViewResource(R.id.notification_custom__img__notif_icon,R.drawable.ic_launcher);
+        customNotifications.setTextViewText(R.id.notification_custom__tv__title,"Music");
+        builder.setContent(customNotifications);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+        {
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel =
+                    new NotificationChannel("NOTIFICATION_CHANNEL_ID",
+                            "NOTIFICATION_CHANNEL_NAME",
+                            importance);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
+            builder.setChannelId("NOTIFICATION_CHANNEL_ID");
+            notifManager.createNotificationChannel(notificationChannel);
+        }
+
+        final View root = findViewById(R.id.activity_main__cl__root);
+        root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("MainActivity","background clicked");
+                notifManager.notify(
+                        new Random().nextInt(4),
+                        builder.build());
+            }
+        });
+
+    }
+
+    private PendingIntent getPendingIntentWithRequestCode(int i) {
+        return null;
     }
 
     @Override
